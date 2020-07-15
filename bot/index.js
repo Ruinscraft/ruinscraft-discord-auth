@@ -10,47 +10,6 @@ discordjsClient.on("ready", () => {
     console.log("Client ready.");
 });
 
-function getGuild() {
-    return discordjsClient.guilds.cache.find(guild => guild.id === process.env.DISCORD_GUILD_ID);
-}
-
-function notifyUserNotValidToken(userId) {
-    let channel = getGuild().channels.get(process.env.DISCORD_LINK_CHANNEL_ID);
-
-    if (channel) {
-        channel.send("<@" + userId + ">, the token you provided was either invalid or already used.");
-    } else {
-        console.log(`Could not find channel with id ${process.env.DISCORD_LINK_CHANNEL_ID}`);
-    }
-}
-
-function linkUser(userId) {
-    let role = getGuild().roles.get(process.env.DISCORD_LINKED_ROLE_ID);
-    let member = getGuild().members.get(userId);
-
-    if (role && member) {
-        member.roles.add(role);
-    }
-}
-
-function addRoleToUser(userId, roleName) {
-    let role = getGuild().roles.find(role => role.roleName === roleName);
-    let member = getGuild().members.get(userId);
-
-    if (role && member) {
-        member.roles.add(role);
-    }
-}
-
-function removeRoleFromUser(userId, roleName) {
-    let role = getGuild().roles.find(role => role.roleName === roleName);
-    let member = getGuild().members.get(userId);
-
-    if (role && member) {
-        member.roles.remove(role);    
-    }
-}
-
 /*
  *  Listen for messages within the authentication channel
  *  so we can link users
@@ -92,3 +51,46 @@ discordjsClient.on("message", async message => {
     }
 });
 
+/*
+ *  Helper functions below
+*/
+function getGuild() {
+    return discordjsClient.guilds.cache.find(guild => guild.id === process.env.DISCORD_GUILD_ID);
+}
+
+function notifyUserNotValidToken(userId) {
+    let channel = getGuild().channels.get(process.env.DISCORD_LINK_CHANNEL_ID);
+
+    if (channel) {
+        channel.send("<@" + userId + ">, the token you provided was either invalid or already used.");
+    } else {
+        console.log(`Could not find channel with id ${process.env.DISCORD_LINK_CHANNEL_ID}`);
+    }
+}
+
+function linkUser(userId) {
+    let role = getGuild().roles.get(process.env.DISCORD_LINKED_ROLE_ID);
+    let member = getGuild().members.get(userId);
+
+    if (role && member) {
+        member.roles.add(role);
+    }
+}
+
+module.exports.addRoleToUser = function (userId, roleName) {
+    let role = getGuild().roles.find(role => role.roleName === roleName);
+    let member = getGuild().members.get(userId);
+
+    if (role && member) {
+        member.roles.add(role);
+    }
+}
+
+module.exports.removeRoleFromUser = function (userId, roleName) {
+    let role = getGuild().roles.find(role => role.roleName === roleName);
+    let member = getGuild().members.get(userId);
+
+    if (role && member) {
+        member.roles.remove(role);    
+    }
+}

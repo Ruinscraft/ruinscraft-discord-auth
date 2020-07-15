@@ -64,7 +64,19 @@ module.exports.queryRoleChanges = function(callback) {
 
         callback(result);
     });
+}
 
+module.exports.deleteRoleChange = function(roleChangeId, callback) {
+    let connection = createConnection();
+    let sql = "DELETE FROM discord_role_queue WHERE id = ?;"
+
+    connection.query(sql, [roleChangeId], function(error, result) {
+        if (error) {
+            throw error;
+        }
+
+        callback(result);
+    });
 }
 
 function executeRoleChanges() {
@@ -72,15 +84,20 @@ function executeRoleChanges() {
 
     queryRoleChanges(result => {
         for (let row in result) {
+            let id = row['id'];
             let mojang_uuid = row['mojang_uuid'];
             let requested_role = row['requested_role'];
             let value = row['value'];
 
             queryDiscordIdFromMojangUuid(mojang_uuid, result => {
                 if (value) {
-                    index.addRoleToUser(result, requested_role);
+                    deleteRoleChange(id, () => {
+                        index.addRoleToUser(result, requested_role);
+                    });
                 } else {
-                    index.removeRoleFromUser(result, requested_role);
+                    deleteRoleChange(id, () => {
+                        index.removeRoleFromUser(result, requested_role);
+                    });
                 }
             });
         }

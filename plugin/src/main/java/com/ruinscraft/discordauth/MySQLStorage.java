@@ -34,9 +34,11 @@ public class MySQLStorage implements Storage {
                             "UNIQUE (mojang_uuid)" +
                             ");");
                     statement.execute("CREATE TABLE IF NOT EXISTS discord_role_queue (" +
+                            "id INT NOT NULL AUTO_INCREMENT, " +
                             "mojang_uuid VARCHAR(36) NOT NULL, " +
                             "requested_role VARCHAR(36) NOT NULL, " +
-                            "value BOOL" +                                      // if to remove or add the role
+                            "value BOOL, " +                                     // if to remove or add the role
+                            "PRIMARY KEY (id)" +
                             ");");
                 }
             } catch (SQLException e) {
