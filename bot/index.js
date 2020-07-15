@@ -28,7 +28,27 @@ function linkUser(userId) {
     let role = getGuild().roles.get(process.env.DISCORD_LINKED_ROLE_ID);
     let member = getGuild().members.get(userId);
 
-    member.roles.add(role);
+    if (role && member) {
+        member.roles.add(role);
+    }
+}
+
+function addRoleToUser(userId, roleName) {
+    let role = getGuild().roles.find(role => role.roleName === roleName);
+    let member = getGuild().members.get(userId);
+
+    if (role && member) {
+        member.roles.add(role);
+    }
+}
+
+function removeRoleFromUser(userId, roleName) {
+    let role = getGuild().roles.find(role => role.roleName === roleName);
+    let member = getGuild().members.get(userId);
+
+    if (role && member) {
+        member.roles.remove(role);    
+    }
 }
 
 /*
