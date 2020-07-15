@@ -1,0 +1,9 @@
+name: ${name}
+main: ${mainClass}
+version: ${version}
+api-version: 1.13
+author: royalkingkb
+depend: [LuckPerms]
+commands:
+  discord:
+    description: Get a link to our Discord server and link your account
