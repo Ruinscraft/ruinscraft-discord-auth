@@ -8,6 +8,8 @@ public interface Storage {
 
     CompletableFuture<Void> insertToken(User lpUser, String token);
 
+    CompletableFuture<Void> updateTokenSetUsed(User lpUser, boolean used);
+
     CompletableFuture<Token> queryToken(User lpUser);
 
     CompletableFuture<Void> insertGroupAdd(User lpUser, String group);

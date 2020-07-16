@@ -20,23 +20,22 @@ module.exports.queryToken = function(token, callback) {
             throw error;
         }
 
-        // if there was SOME result from the table it'll return true to the callback
-        callback(result.length > 0);
+        callback(result);
     });
 
     connection.end();
 }
 
-module.exports.updateToken = function(token, callback) {
+module.exports.updateToken = function(token, userId, callback) {
     let connection = createConnection();
-    let sql = "UPDATE discord_auth SET token_used = 1 WHERE token = ?;";
+    let sql = "UPDATE discord_auth SET token_used = 1, discord_user_id = ? WHERE token = ?;";
 
-    connection.query(sql, [token], function(error, result) {
+    connection.query(sql, [userId, token], function(error) {
         if (error) {
             throw error;
         }
 
-        callback(result.length > 0);
+        callback();
     });
 
     connection.end();
@@ -51,7 +50,9 @@ module.exports.queryDiscordIdFromMojangUuid = function (mojangUuid, callback) {
             throw error;
         }
 
-        callback(result['mojang_uuid']);
+        for (let row of result) {
+            callback(row['discord_user_id'].toString());
+        }
     });
 
     connection.end();
@@ -91,7 +92,7 @@ function executeRoleChanges() {
     console.log("Executing role changes...");
 
     module.exports.queryRoleChanges(result => {
-        for (let row in result) {
+        for (let row of result) {
             let id = row['id'];
             let mojang_uuid = row['mojang_uuid'];
             let requested_role = row['requested_role'];
@@ -114,4 +115,4 @@ function executeRoleChanges() {
     });
 }
 
-setInterval(executeRoleChanges, 1 * 1000); // execute role changes every 10 seconds
+setInterval(executeRoleChanges, 1000 * 1); // execute role changes on timer

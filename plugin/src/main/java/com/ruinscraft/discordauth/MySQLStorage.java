@@ -65,6 +65,21 @@ public class MySQLStorage implements Storage {
     }
 
     @Override
+    public CompletableFuture<Void> updateTokenSetUsed(User lpUser, boolean used) {
+        return CompletableFuture.runAsync(() -> {
+           try (Connection connection = getConnection()) {
+               try (PreparedStatement update = connection.prepareStatement("UPDATE discord_auth SET token_used = ? WHERE mojang_uuid = ?;")) {
+                   update.setBoolean(1, used);
+                   update.setString(2, lpUser.getUniqueId().toString());
+                   update.execute();
+               }
+           } catch (SQLException e) {
+               e.printStackTrace();
+           }
+        });
+    }
+
+    @Override
     public CompletableFuture<Token> queryToken(User lpUser) {
         return CompletableFuture.supplyAsync(() -> {
             try (Connection connection = getConnection()) {
@@ -96,6 +111,7 @@ public class MySQLStorage implements Storage {
                     insert.setString(1, lpUser.getUniqueId().toString());
                     insert.setString(2, group);
                     insert.setBoolean(3, true);
+                    insert.execute();
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -111,6 +127,7 @@ public class MySQLStorage implements Storage {
                     insert.setString(1, lpUser.getUniqueId().toString());
                     insert.setString(2, group);
                     insert.setBoolean(3, false);
+                    insert.execute();
                 }
             } catch (SQLException e) {
                 e.printStackTrace();

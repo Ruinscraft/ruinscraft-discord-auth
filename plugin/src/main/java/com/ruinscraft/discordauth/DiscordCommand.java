@@ -30,21 +30,27 @@ public class DiscordCommand implements CommandExecutor {
         Player player = (Player) sender;
         User lpUser = luckPerms.getUserManager().getUser(player.getUniqueId());
 
+        if (args.length > 0) {
+            if (args[0].equalsIgnoreCase("relink")) {
+                plugin.getStorage().updateTokenSetUsed(lpUser, false);
+                return onCommand(sender, command, label, new String[0]);
+            }
+        }
+
         plugin.getStorage().queryToken(lpUser).thenAccept(result -> {
             if (player.isOnline()) {
-                player.sendMessage(ChatColor.DARK_PURPLE + "Discord Invite Link: https://discord.com/invite/srSSSgJ");
+                player.sendMessage(ChatColor.GOLD + "Discord Invite Link:" + ChatColor.LIGHT_PURPLE + " https://ruinscraft.com/discord");
             }
 
             if (result != null) {
                 if (result.isUsed()) {
                     if (player.isOnline()) {
-                        player.sendMessage(ChatColor.DARK_PURPLE + "Your account has been previously linked with our Discord group.");
-                        player.sendMessage(ChatColor.DARK_PURPLE + "If you need to re-link your account, run /discord relink");
+                        player.sendMessage(ChatColor.GOLD + "Your account has been previously linked with our Discord.");
+                        player.sendMessage(ChatColor.GOLD + "If you need to re-link your account, run " + ChatColor.LIGHT_PURPLE + "/discord relink");
                     }
                 } else {
                     if (player.isOnline()) {
-                        player.sendMessage(ChatColor.DARK_PURPLE + "Your token: " + ChatColor.LIGHT_PURPLE + result.getToken());
-                        player.sendMessage(ChatColor.DARK_PURPLE + "Type !link <token> in the #link-your-account channel in our Discord group.");
+                        sendLinkCommand(player, result.getToken());
                     }
                 }
             } else {
@@ -52,14 +58,17 @@ public class DiscordCommand implements CommandExecutor {
 
                 plugin.getStorage().insertToken(lpUser, token).thenRun(() -> {
                     if (player.isOnline()) {
-                        player.sendMessage(ChatColor.DARK_PURPLE + "Your token: " + ChatColor.LIGHT_PURPLE + token);
-                        player.sendMessage(ChatColor.DARK_PURPLE + "Type !link <token> in the #link-your-account channel in our Discord group.");
+                        sendLinkCommand(player, result.getToken());
                     }
                 });
             }
         });
 
         return true;
+    }
+
+    private static void sendLinkCommand(Player player, String token) {
+        player.sendMessage(ChatColor.GOLD + "Type" + ChatColor.LIGHT_PURPLE + " !link " + token + ChatColor.GOLD + " in the #link-your-account channel in our Discord.");
     }
 
     private static String generateToken() {

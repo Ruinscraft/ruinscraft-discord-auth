@@ -19,6 +19,9 @@ discordjsClient.on("message", async message => {
         return; // not the authentication channel
     }
     
+    // delete any message in the channel after 10s
+    message.delete({ timeout: 10000 });
+
     if (message.author.bot) {
         return; // ignore bots (including this one)
     }
@@ -38,15 +41,25 @@ discordjsClient.on("message", async message => {
         }
 
         storage.queryToken(token, result => {
-            if (result) {
-                // token exists
-                storage.updateToken(token, result => {
-                    // add to linked role after marking token as used
-                    linkUser(message.author.id);
-                });
-            } else {
-                // token did not exist
+            if (result.length == 0) {
+                // token did not exist in storage
                 notifyUserNotValidToken(message.author.id);
+                return;
+            }
+
+            for (let row in result) {
+                if (!row['token_used']) {
+                    // token exists and was unused
+                    storage.updateToken(token, message.author.id, () => {
+                        // add to linked role after marking token as used
+                        module.exports.addLinkedRoleToUser(message.author.id);
+                    });
+
+                    // insert discord user ID into table
+                } else {
+                    // token was already used
+                    notifyUserNotValidToken(message.author.id);
+                }
             }
         });
     }
@@ -55,10 +68,10 @@ discordjsClient.on("message", async message => {
 discordjsClient.login(process.env.DISCORD_TOKEN);
 
 /*
- *  Helper functions below
-*/
+ *  Helper functions
+ */
 function getGuild() {
-    return discordjsClient.guilds.cache.find(guild => guild.id === process.env.DISCORD_GUILD_ID);
+    return discordjsClient.guilds.cache.get(process.env.DISCORD_GUILD_ID);
 }
 
 function notifyUserNotValidToken(userId) {
@@ -69,29 +82,34 @@ function notifyUserNotValidToken(userId) {
     }
 }
 
-function linkUser(userId) {
-    getGuild().roles.fetch(process.env.DISCORD_LINKED_ROLE_ID).then(role => {
-        getGuild().members.fetch(userId).then(member => {
-            member.roles.add(role);
-        });
-    });
+/*
+ *  Exported helper functions
+ */
+module.exports.addLinkedRoleToUser = function (userId) {
+    let member = getGuild().members.cache.get(userId);
+    let role = getGuild().roles.cache.get(process.env.DISCORD_LINKED_ROLE_ID);
+
+    if (member && role) {
+        member.roles.add(role);
+    }
 }
 
 module.exports.addRoleToUser = function (userId, roleName) {
-    let role = getGuild().roles.cache.find(role => role.roleName === roleName);
+    let member = getGuild().members.cache.get(userId);
+    let role = getGuild().roles.cache.find(role => role.name.toLowerCase() === roleName.toLowerCase());
 
-    if (role) {
-        getGuild().members.fetch(userId).then(member => {
-            member.roles.add(role);
-        });
+    console.log(member);
+
+    if (member && role) {
+        member.roles.add(role);
     }
 }
 
 module.exports.removeRoleFromUser = function (userId, roleName) {
-    let role = getGuild().roles.find(role => role.roleName === roleName);
-    let member = getGuild().members.get(userId);
+    let member = getGuild().members.cache.get(userId);
+    let role = getGuild().roles.cache.find(role => role.name.toLowerCase() === roleName.toLowerCase());
 
-    if (role && member) {
-        member.roles.remove(role);    
+    if (member && role) {
+        member.roles.remove(role);
     }
 }
