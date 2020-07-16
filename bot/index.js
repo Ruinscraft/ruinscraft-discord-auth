@@ -51,6 +51,8 @@ discordjsClient.on("message", async message => {
     }
 });
 
+discordjsClient.login(process.env.DISCORD_TOKEN);
+
 /*
  *  Helper functions below
 */
@@ -69,6 +71,7 @@ function notifyUserNotValidToken(userId) {
 }
 
 function linkUser(userId) {
+    let role = getGuild
     let role = getGuild().roles.get(process.env.DISCORD_LINKED_ROLE_ID);
     let member = getGuild().members.get(userId);
 

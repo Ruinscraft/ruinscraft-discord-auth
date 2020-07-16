@@ -4,6 +4,8 @@ const index = require('./index');
 function createConnection() {
     return mysql.createConnection({
         host: process.env.MYSQL_HOST,
+        port: process.env.MYSQL_PORT,
+        database: process.env.MYSQL_DATABASE,
         user: process.env.MYSQL_USER,
         password: process.env.MYSQL_PASSWORD
     });
@@ -13,7 +15,7 @@ module.exports.queryToken = function(token, callback) {
     let connection = createConnection();
     let sql = "SELECT * FROM discord_auth WHERE token = ?;";
 
-    connection.query(query, [token], function(error, result) {
+    connection.query(sql, [token], function(error, result) {
         if (error) {
             throw error;
         }
@@ -51,6 +53,8 @@ module.exports.queryDiscordIdFromMojangUuid = function (mojangUuid, callback) {
 
         callback(result['mojang_uuid']);
     });
+
+    connection.end();
 }
 
 module.exports.queryRoleChanges = function(callback) {
@@ -64,6 +68,8 @@ module.exports.queryRoleChanges = function(callback) {
 
         callback(result);
     });
+
+    connection.end();
 }
 
 module.exports.deleteRoleChange = function(roleChangeId, callback) {
@@ -77,25 +83,27 @@ module.exports.deleteRoleChange = function(roleChangeId, callback) {
 
         callback(result);
     });
+
+    connection.end();
 }
 
 function executeRoleChanges() {
     console.log("Executing role changes...");
 
-    queryRoleChanges(result => {
+    module.exports.queryRoleChanges(result => {
         for (let row in result) {
             let id = row['id'];
             let mojang_uuid = row['mojang_uuid'];
             let requested_role = row['requested_role'];
             let value = row['value'];
 
-            queryDiscordIdFromMojangUuid(mojang_uuid, result => {
+            module.exports.queryDiscordIdFromMojangUuid(mojang_uuid, result => {
                 if (value) {
-                    deleteRoleChange(id, () => {
+                    module.exports.deleteRoleChange(id, () => {
                         index.addRoleToUser(result, requested_role);
                     });
                 } else {
-                    deleteRoleChange(id, () => {
+                    module.exports.deleteRoleChange(id, () => {
                         index.removeRoleFromUser(result, requested_role);
                     });
                 }
@@ -106,4 +114,4 @@ function executeRoleChanges() {
     });
 }
 
-setInterval(executeRoleChanges, 10 * 1000); // execute role changes every 10 seconds
+setInterval(executeRoleChanges, 1 * 1000); // execute role changes every 10 seconds
