@@ -14,13 +14,17 @@ public class DiscordAuthPlugin extends JavaPlugin {
 
     private Storage storage;
 
+    public Storage getStorage() {
+        return storage;
+    }
+
     @Override
     public void onEnable() {
         saveDefaultConfig();
         setupStorage();
         subscribeToLuckPermsEvents();
 
-        getCommand("discord").setExecutor(new DiscordCommand(storage));
+        getCommand("discord").setExecutor(new DiscordCommand(this));
     }
 
     private void setupStorage() {

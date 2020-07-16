@@ -13,11 +13,11 @@ import java.util.UUID;
 
 public class DiscordCommand implements CommandExecutor {
 
-    private Storage storage;
+    private DiscordAuthPlugin plugin;
     private LuckPerms luckPerms;
 
-    public DiscordCommand(Storage storage) {
-        this.storage = storage;
+    public DiscordCommand(DiscordAuthPlugin plugin) {
+        this.plugin = plugin;
         luckPerms = LuckPermsProvider.get();
     }
 
@@ -30,7 +30,7 @@ public class DiscordCommand implements CommandExecutor {
         Player player = (Player) sender;
         User lpUser = luckPerms.getUserManager().getUser(player.getUniqueId());
 
-        storage.queryToken(lpUser).thenAccept(result -> {
+        plugin.getStorage().queryToken(lpUser).thenAccept(result -> {
             if (player.isOnline()) {
                 player.sendMessage(ChatColor.DARK_PURPLE + "Discord Invite Link: https://discord.com/invite/srSSSgJ");
             }
@@ -50,9 +50,9 @@ public class DiscordCommand implements CommandExecutor {
             } else {
                 String token = generateToken();
 
-                storage.insertToken(lpUser, token).thenRun(() -> {
+                plugin.getStorage().insertToken(lpUser, token).thenRun(() -> {
                     if (player.isOnline()) {
-                        player.sendMessage(ChatColor.DARK_PURPLE + "Your token: " + ChatColor.LIGHT_PURPLE + result.getToken());
+                        player.sendMessage(ChatColor.DARK_PURPLE + "Your token: " + ChatColor.LIGHT_PURPLE + token);
                         player.sendMessage(ChatColor.DARK_PURPLE + "Type !link <token> in the #link-your-account channel in our Discord group.");
                     }
                 });
