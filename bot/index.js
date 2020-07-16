@@ -34,6 +34,7 @@ discordjsClient.on("message", async message => {
         // check the length first before hitting the database
         if (token.length !== 8) {
             notifyUserNotValidToken(message.author.id);
+            return;
         }
 
         storage.queryToken(token, result => {
@@ -61,31 +62,28 @@ function getGuild() {
 }
 
 function notifyUserNotValidToken(userId) {
-    let channel = getGuild().channels.get(process.env.DISCORD_LINK_CHANNEL_ID);
+    let channel = getGuild().channels.cache.get(process.env.DISCORD_LINK_CHANNEL_ID);
 
     if (channel) {
         channel.send("<@" + userId + ">, the token you provided was either invalid or already used.");
-    } else {
-        console.log(`Could not find channel with id ${process.env.DISCORD_LINK_CHANNEL_ID}`);
     }
 }
 
 function linkUser(userId) {
-    let role = getGuild
-    let role = getGuild().roles.get(process.env.DISCORD_LINKED_ROLE_ID);
-    let member = getGuild().members.get(userId);
-
-    if (role && member) {
-        member.roles.add(role);
-    }
+    getGuild().roles.fetch(process.env.DISCORD_LINKED_ROLE_ID).then(role => {
+        getGuild().members.fetch(userId).then(member => {
+            member.roles.add(role);
+        });
+    });
 }
 
 module.exports.addRoleToUser = function (userId, roleName) {
-    let role = getGuild().roles.find(role => role.roleName === roleName);
-    let member = getGuild().members.get(userId);
+    let role = getGuild().roles.cache.find(role => role.roleName === roleName);
 
-    if (role && member) {
-        member.roles.add(role);
+    if (role) {
+        getGuild().members.fetch(userId).then(member => {
+            member.roles.add(role);
+        });
     }
 }
 
