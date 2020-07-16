@@ -26,11 +26,11 @@ module.exports.queryToken = function(token, callback) {
     connection.end();
 }
 
-module.exports.updateToken = function(token, userId, callback) {
+module.exports.updateToken = function(token, member, callback) {
     let connection = createConnection();
     let sql = "UPDATE discord_auth SET token_used = 1, discord_user_id = ? WHERE token = ?;";
 
-    connection.query(sql, [userId, token], function(error) {
+    connection.query(sql, [member.id, token], function(error) {
         if (error) {
             throw error;
         }
@@ -50,8 +50,12 @@ module.exports.queryDiscordIdFromMojangUuid = function (mojangUuid, callback) {
             throw error;
         }
 
-        for (let row of result) {
-            callback(row['discord_user_id'].toString());
+        if (result.length === 0) {
+            callback();
+        } else {
+            for (let row of result) {
+                callback(row['discord_user_id']);
+            }
         }
     });
 
@@ -92,6 +96,8 @@ function executeRoleChanges() {
     console.log("Executing role changes...");
 
     module.exports.queryRoleChanges(result => {
+        var changed = 0;
+
         for (let row of result) {
             let id = row['id'];
             let mojang_uuid = row['mojang_uuid'];
@@ -99,19 +105,25 @@ function executeRoleChanges() {
             let value = row['value'];
 
             module.exports.queryDiscordIdFromMojangUuid(mojang_uuid, result => {
-                if (value) {
-                    module.exports.deleteRoleChange(id, () => {
-                        index.addRoleToUser(result, requested_role);
-                    });
-                } else {
-                    module.exports.deleteRoleChange(id, () => {
-                        index.removeRoleFromUser(result, requested_role);
-                    });
-                }
+                module.exports.deleteRoleChange(id, () => {
+                    let member = index.getMember(result);
+
+                    if (!member) {
+                        return; // could not find discord member
+                    }
+
+                    if (value) {
+                        index.addRoleToMember(member, requested_role);
+                    } else {
+                        index.removeRoleFromMember(member, requested_role);
+                    }
+
+                    changed++;
+                });
             });
         }
 
-        console.log(`Finished executing role changes. Total of ${result.length} roles changed.`);
+        console.log(`Finished executing role changes. Total of ${changed} roles changed.`);
     });
 }
 

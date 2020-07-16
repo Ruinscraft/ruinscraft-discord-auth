@@ -54,11 +54,11 @@ public class DiscordCommand implements CommandExecutor {
                     }
                 }
             } else {
-                String token = generateToken();
+                String newToken = generateToken();
 
-                plugin.getStorage().insertToken(lpUser, token).thenRun(() -> {
+                plugin.getStorage().insertToken(lpUser, newToken).thenRun(() -> {
                     if (player.isOnline()) {
-                        sendLinkCommand(player, result.getToken());
+                        sendLinkCommand(player, newToken);
                     }
                 });
             }

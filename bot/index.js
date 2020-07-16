@@ -36,29 +36,29 @@ discordjsClient.on("message", async message => {
 
         // check the length first before hitting the database
         if (token.length !== 8) {
-            notifyUserNotValidToken(message.author.id);
+            notifyMemberNotValidToken(message.member);
             return;
         }
 
         storage.queryToken(token, result => {
             if (result.length == 0) {
                 // token did not exist in storage
-                notifyUserNotValidToken(message.author.id);
+                notifyMemberNotValidToken(message.member);
                 return;
             }
 
             for (let row in result) {
                 if (!row['token_used']) {
                     // token exists and was unused
-                    storage.updateToken(token, message.author.id, () => {
+                    storage.updateToken(token, message.member, () => {
                         // add to linked role after marking token as used
-                        module.exports.addLinkedRoleToUser(message.author.id);
+                        module.exports.addLinkedRoleToMember(message.member);
                     });
 
                     // insert discord user ID into table
                 } else {
                     // token was already used
-                    notifyUserNotValidToken(message.author.id);
+                    notifyMemberNotValidToken(message.member);
                 }
             }
         });
@@ -70,46 +70,45 @@ discordjsClient.login(process.env.DISCORD_TOKEN);
 /*
  *  Helper functions
  */
-function getGuild() {
-    return discordjsClient.guilds.cache.get(process.env.DISCORD_GUILD_ID);
-}
-
-function notifyUserNotValidToken(userId) {
-    let channel = getGuild().channels.cache.get(process.env.DISCORD_LINK_CHANNEL_ID);
+function notifyMemberNotValidToken(member) {
+    let channel = module.exports.getGuild().channels.cache.get(process.env.DISCORD_LINK_CHANNEL_ID);
 
     if (channel) {
-        channel.send("<@" + userId + ">, the token you provided was either invalid or already used.");
+        channel.send("<@" + member.id + ">, the token you provided was either invalid or already used.");
     }
 }
 
 /*
  *  Exported helper functions
  */
-module.exports.addLinkedRoleToUser = function (userId) {
-    let member = getGuild().members.cache.get(userId);
-    let role = getGuild().roles.cache.get(process.env.DISCORD_LINKED_ROLE_ID);
+module.exports.getGuild = function () {
+    return discordjsClient.guilds.cache.get(process.env.DISCORD_GUILD_ID);
+}
 
-    if (member && role) {
+module.exports.getMember = function(userId) {
+    return module.exports.getGuild().members.cache.get(userId);
+}
+
+module.exports.addLinkedRoleToMember = function (member) {
+    let role = module.exports.getGuild().roles.cache.get(process.env.DISCORD_LINKED_ROLE_ID);
+
+    if (role) {
         member.roles.add(role);
     }
 }
 
-module.exports.addRoleToUser = function (userId, roleName) {
-    let member = getGuild().members.cache.get(userId);
-    let role = getGuild().roles.cache.find(role => role.name.toLowerCase() === roleName.toLowerCase());
+module.exports.addRoleToMember = function (member, roleName) {
+    let role = module.exports.getGuild().roles.cache.find(role => role.name.toLowerCase() === roleName.toLowerCase());
 
-    console.log(member);
-
-    if (member && role) {
+    if (role) {
         member.roles.add(role);
     }
 }
 
-module.exports.removeRoleFromUser = function (userId, roleName) {
-    let member = getGuild().members.cache.get(userId);
-    let role = getGuild().roles.cache.find(role => role.name.toLowerCase() === roleName.toLowerCase());
+module.exports.removeRoleFromMember = function (member, roleName) {
+    let role = module.exports.getGuild().roles.cache.find(role => role.name.toLowerCase() === roleName.toLowerCase());
 
-    if (member && role) {
+    if (role) {
         member.roles.remove(role);
     }
 }

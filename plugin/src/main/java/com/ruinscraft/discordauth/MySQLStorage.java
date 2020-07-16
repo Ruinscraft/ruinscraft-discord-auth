@@ -27,7 +27,7 @@ public class MySQLStorage implements Storage {
                     statement.execute("CREATE TABLE IF NOT EXISTS discord_auth (" +
                             "token VARCHAR(8) NOT NULL, " +
                             "token_used BOOL DEFAULT 0, " +
-                            "discord_user_id BIGINT DEFAULT 0, " +              // unique
+                            "discord_user_id VARCHAR(32) DEFAULT NULL, " +              // unique
                             "mojang_uuid VARCHAR(36) NOT NULL, " +              // unique
                             "minecraft_username VARCHAR(16) NOT NULL, " +
                             "UNIQUE (discord_user_id), " +
