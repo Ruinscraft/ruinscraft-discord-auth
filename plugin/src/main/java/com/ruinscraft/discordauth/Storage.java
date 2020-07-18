@@ -16,4 +16,8 @@ public interface Storage {
 
     CompletableFuture<Void> insertGroupRemove(User lpUser, String group);
 
+    CompletableFuture<String> queryUsername(User lpUser);
+
+    CompletableFuture<Void> insertUsernameChange(User lpUser);
+
 }

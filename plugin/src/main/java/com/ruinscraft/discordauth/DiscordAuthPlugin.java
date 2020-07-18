@@ -25,6 +25,7 @@ public class DiscordAuthPlugin extends JavaPlugin {
         subscribeToLuckPermsEvents();
 
         getCommand("discord").setExecutor(new DiscordCommand(this));
+        getServer().getPluginManager().registerEvents(new LoginListener(this), this);
     }
 
     private void setupStorage() {
