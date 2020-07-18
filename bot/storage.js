@@ -64,7 +64,7 @@ module.exports.queryDiscordIdFromMojangUuid = function (mojangUuid, callback) {
 
 module.exports.queryRoleChanges = function(callback) {
     let connection = createConnection();
-    let sql = "SELECT * FROM discord_role_queue;";
+    let sql = "SELECT * FROM discord_role_queue order by id;";
 
     connection.query(sql, function(error, result) {
         if (error) {
@@ -94,7 +94,7 @@ module.exports.deleteRoleChange = function(roleChangeId, callback) {
 
 module.exports.queryUsernameChanges = function(callback) {
     let connection = createConnection();
-    let sql = "SELECT * FROM discord_username_queue;";
+    let sql = "SELECT * FROM discord_username_queue order by id;";
 
     connection.query(sql, function(error, result) {
         if (error) {
