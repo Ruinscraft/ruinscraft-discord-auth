@@ -1,8 +1,10 @@
 require('dotenv').config()
 
+const storage = require('./storage');
+const tasks = require('./tasks');
+
 const discordjs = require("discord.js");
 const discordjsClient = new discordjs.Client();
-const storage = require('./storage');
 
 console.log("Starting...");
 
@@ -47,19 +49,27 @@ discordjsClient.on("message", async message => {
                 return;
             }
 
-            for (let row in result) {
-                if (!row['token_used']) {
-                    // token exists and was unused
-                    storage.updateToken(token, message.member, () => {
-                        // add to linked role after marking token as used
-                        module.exports.addLinkedRoleToMember(message.member);
-                    });
+            for (let row of result) {
+                let token_used = row['token_used'];
+                let minecraft_username = row['minecraft_username'];
 
-                    // insert discord user ID into table
-                } else {
-                    // token was already used
+                // check if the token was already used
+                if (token_used) {
                     notifyMemberNotValidToken(message.member);
+                    return;
                 }
+
+                storage.updateToken(token, message.member, () => {
+                    // add to linked role after marking token as used
+                    module.exports.addLinkedRoleToMember(message.member);
+                    // update their username
+
+                    message.member.setNickname(minecraft_username).catch(error => {
+                        console.log(error);
+                    })
+                    
+                    notifyMemberValidToken(message.member);
+                });
             }
         });
     }
@@ -75,6 +85,14 @@ function notifyMemberNotValidToken(member) {
 
     if (channel) {
         channel.send("<@" + member.id + ">, the token you provided was either invalid or already used.");
+    }
+}
+
+function notifyMemberValidToken(member) {
+    let channel = module.exports.getGuild().channels.cache.get(process.env.DISCORD_LINK_CHANNEL_ID);
+
+    if (channel) {
+        channel.send("<@" + member.id + ">, your account has been successfully linked!");
     }
 }
 
@@ -112,3 +130,9 @@ module.exports.removeRoleFromMember = function (member, roleName) {
         member.roles.remove(role);
     }
 }
+
+/*
+ * Interval tasks
+ */
+setInterval(tasks.executeRoleChanges, 1000 * 1); // execute role changes on timer
+setInterval(tasks.executeUsernameChanges, 1000 * 1); // execute username changes on timer

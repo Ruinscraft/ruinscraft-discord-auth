@@ -92,39 +92,32 @@ module.exports.deleteRoleChange = function(roleChangeId, callback) {
     connection.end();
 }
 
-function executeRoleChanges() {
-    console.log("Executing role changes...");
+module.exports.queryUsernameChanges = function(callback) {
+    let connection = createConnection();
+    let sql = "SELECT * FROM discord_username_queue;";
 
-    module.exports.queryRoleChanges(result => {
-        var changed = 0;
-
-        for (let row of result) {
-            let id = row['id'];
-            let mojang_uuid = row['mojang_uuid'];
-            let requested_role = row['requested_role'];
-            let value = row['value'];
-
-            module.exports.queryDiscordIdFromMojangUuid(mojang_uuid, result => {
-                module.exports.deleteRoleChange(id, () => {
-                    let member = index.getMember(result);
-
-                    if (!member) {
-                        return; // could not find discord member
-                    }
-
-                    if (value) {
-                        index.addRoleToMember(member, requested_role);
-                    } else {
-                        index.removeRoleFromMember(member, requested_role);
-                    }
-
-                    changed++;
-                });
-            });
+    connection.query(sql, function(error, result) {
+        if (error) {
+            throw error;
         }
 
-        console.log(`Finished executing role changes. Total of ${changed} roles changed.`);
+        callback(result);
     });
+
+    connection.end();
 }
 
-setInterval(executeRoleChanges, 1000 * 1); // execute role changes on timer
+module.exports.deleteUsernameChange = function(usernameChangeId, callback) {
+    let connection = createConnection();
+    let sql = "DELETE FROM discord_username_queue WHERE id = ?;";
+
+    connection.query(sql, [usernameChangeId], function(error, result) {
+        if (error) {
+            throw error;
+        }
+
+        callback(result);
+    });
+
+    connection.end();
+}
