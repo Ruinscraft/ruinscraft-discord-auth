@@ -18,6 +18,6 @@ public interface Storage {
 
     CompletableFuture<String> queryUsername(User lpUser);
 
-    CompletableFuture<Void> insertUsernameChange(User lpUser);
+    CompletableFuture<Void> insertUsernameChange(User lpUser, String username);
 
 }

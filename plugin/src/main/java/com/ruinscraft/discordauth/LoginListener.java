@@ -26,8 +26,8 @@ public class LoginListener implements Listener {
         plugin.getStorage().queryUsername(lpUser).thenAccept(result -> {
             // check if old username in DB is not the same as current username
             if (!player.getName().equals(result)) {
-                plugin.getStorage().insertUsernameChange(lpUser).thenRun(() -> {
-                    plugin.getLogger().info("Updated username in Discord for " + lpUser.getUsername());
+                plugin.getStorage().insertUsernameChange(lpUser, player.getName()).thenRun(() -> {
+                    plugin.getLogger().info("Updated username in Discord for " + player.getName());
                 });
             }
         });

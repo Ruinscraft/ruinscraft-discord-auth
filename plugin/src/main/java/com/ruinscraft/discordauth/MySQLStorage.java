@@ -163,12 +163,12 @@ public class MySQLStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<Void> insertUsernameChange(User lpUser) {
+    public CompletableFuture<Void> insertUsernameChange(User lpUser, String username) {
         return CompletableFuture.runAsync(() -> {
             try (Connection connection = getConnection()) {
                 try (PreparedStatement insert = connection.prepareStatement("INSERT INTO discord_username_queue (mojang_uuid, minecraft_username) VALUES (?, ?);")) {
                     insert.setString(1, lpUser.getUniqueId().toString());
-                    insert.setString(2, lpUser.getUsername());
+                    insert.setString(2, username);
                     insert.execute();
                 }
             } catch (SQLException e) {
