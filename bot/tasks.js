@@ -2,8 +2,6 @@ const index = require('./index');
 const storage = require('./storage');
 
 module.exports.executeRoleChanges = function() {
-    console.log("Executing role changes...");
-
     storage.queryRoleChanges(result => {
         for (let row of result) {
             let id = row['id'];
@@ -31,8 +29,6 @@ module.exports.executeRoleChanges = function() {
 }
 
 module.exports.executeUsernameChanges = function() {
-    console.log("Executing username changes...");
-
     storage.queryUsernameChanges(result => {
         for (let row of result) {
             let id = row['id'];
