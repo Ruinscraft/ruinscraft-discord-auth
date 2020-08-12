@@ -22,7 +22,9 @@ discordjsClient.on("message", async message => {
     }
     
     // delete any message in the channel after 10s
-    message.delete({ timeout: 10000 });
+    message.delete({ timeout: 10000 }).catch(error => {
+        console.log("Could not delete message: " + error);
+    });
 
     if (message.author.bot) {
         return; // ignore bots (including this one)
@@ -65,7 +67,7 @@ discordjsClient.on("message", async message => {
                     // update their username
 
                     message.member.setNickname(minecraft_username).catch(error => {
-                        console.log(error);
+                        console.log("Could not set nickname for: " + minecraft_username + ": " + error);
                     })
                     
                     notifyMemberValidToken(message.member);
@@ -85,7 +87,7 @@ function notifyMemberNotValidToken(member) {
 
     if (channel) {
         channel.send("<@" + member.id + ">, the token you provided was either invalid or already used.").catch(error => {
-            console.log(error);
+            console.log("Could not send message to channel: " + error);
         });
     }
 }
@@ -95,7 +97,7 @@ function notifyMemberValidToken(member) {
 
     if (channel) {
         channel.send("<@" + member.id + ">, your account has been successfully linked!").catch(error => {
-            console.log(error);
+            console.log("Could not send message to channel: " + error);
         });
     }
 }
@@ -116,8 +118,9 @@ module.exports.addLinkedRoleToMember = function (member) {
 
     if (role) {
         member.roles.add(role).catch(error => {
-            console.log(error);
+            console.log("Could not give role to: " + member.name + ": " + error);
         });
+
         console.log("Gave role " + role.name + " to " + member.name);
     }
 }
@@ -127,8 +130,9 @@ module.exports.addRoleToMember = function (member, roleName) {
 
     if (role) {
         member.roles.add(role).catch(error => {
-            console.log(error);
+            console.log("Could not give role to: " + member.name + ": " + error);
         });
+
         console.log("Gave role " + role.name + " to " + member.name);
     }
 }
@@ -138,8 +142,9 @@ module.exports.removeRoleFromMember = function (member, roleName) {
 
     if (role) {
         member.roles.remove(role).catch(error => {
-            console.log(error);
+            console.log("Could not remove role from: " + member.name + ": " + error);
         });
+
         console.log("Revoked role " + role.name + " from " + member.name);
     }
 }
