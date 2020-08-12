@@ -84,7 +84,9 @@ function notifyMemberNotValidToken(member) {
     let channel = module.exports.getGuild().channels.cache.get(process.env.DISCORD_LINK_CHANNEL_ID);
 
     if (channel) {
-        channel.send("<@" + member.id + ">, the token you provided was either invalid or already used.");
+        channel.send("<@" + member.id + ">, the token you provided was either invalid or already used.").catch(error => {
+            console.log(error);
+        });
     }
 }
 
@@ -92,7 +94,9 @@ function notifyMemberValidToken(member) {
     let channel = module.exports.getGuild().channels.cache.get(process.env.DISCORD_LINK_CHANNEL_ID);
 
     if (channel) {
-        channel.send("<@" + member.id + ">, your account has been successfully linked!");
+        channel.send("<@" + member.id + ">, your account has been successfully linked!").catch(error => {
+            console.log(error);
+        });
     }
 }
 
@@ -111,7 +115,10 @@ module.exports.addLinkedRoleToMember = function (member) {
     let role = module.exports.getGuild().roles.cache.get(process.env.DISCORD_LINKED_ROLE_ID);
 
     if (role) {
-        member.roles.add(role);
+        member.roles.add(role).catch(error => {
+            console.log(error);
+        });
+        console.log("Gave role " + role.name + " to " + member.name);
     }
 }
 
@@ -119,7 +126,10 @@ module.exports.addRoleToMember = function (member, roleName) {
     let role = module.exports.getGuild().roles.cache.find(role => role.name.toLowerCase() === roleName.toLowerCase());
 
     if (role) {
-        member.roles.add(role);
+        member.roles.add(role).catch(error => {
+            console.log(error);
+        });
+        console.log("Gave role " + role.name + " to " + member.name);
     }
 }
 
@@ -127,7 +137,10 @@ module.exports.removeRoleFromMember = function (member, roleName) {
     let role = module.exports.getGuild().roles.cache.find(role => role.name.toLowerCase() === roleName.toLowerCase());
 
     if (role) {
-        member.roles.remove(role);
+        member.roles.remove(role).catch(error => {
+            console.log(error);
+        });
+        console.log("Revoked role " + role.name + " from " + member.name);
     }
 }
 
