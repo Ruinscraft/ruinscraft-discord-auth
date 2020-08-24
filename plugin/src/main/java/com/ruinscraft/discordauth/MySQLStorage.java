@@ -30,7 +30,6 @@ public class MySQLStorage implements Storage {
                             "discord_user_id VARCHAR(32) DEFAULT NULL, " +
                             "mojang_uuid VARCHAR(36) NOT NULL, " +
                             "minecraft_username VARCHAR(16) DEFAULT NULL, " +
-                            "UNIQUE (discord_user_id), " +
                             "UNIQUE (mojang_uuid)" +
                             ");");
                     statement.execute("CREATE TABLE IF NOT EXISTS discord_role_queue (" +
