@@ -32,8 +32,10 @@ public class DiscordCommand implements CommandExecutor {
 
         if (args.length > 0) {
             if (args[0].equalsIgnoreCase("relink")) {
-                plugin.getStorage().updateTokenSetUsed(lpUser, false);
-                return onCommand(sender, command, label, new String[0]);
+                plugin.getStorage().updateTokenSetUsed(lpUser, false).thenRun(() -> {
+                    onCommand(sender, command, label, new String[0]);
+                });
+                return true;
             }
         }
 
