@@ -118,10 +118,10 @@ module.exports.addLinkedRoleToMember = function (member) {
 
     if (role) {
         member.roles.add(role).catch(error => {
-            console.log("Could not give role to: " + member.name + ": " + error);
+            console.log("Could not give role to: " + member.user.username + ": " + error);
         });
 
-        console.log("Gave role " + role.name + " to " + member.name);
+        console.log("Gave role " + role.name + " to " + member.user.username);
     }
 }
 
@@ -130,10 +130,10 @@ module.exports.addRoleToMember = function (member, roleName) {
 
     if (role) {
         member.roles.add(role).catch(error => {
-            console.log("Could not give role to: " + member.name + ": " + error);
+            console.log("Could not give role to: " + member.user.username + ": " + error);
         });
 
-        console.log("Gave role " + role.name + " to " + member.name);
+        console.log("Gave role " + role.name + " to " + member.user.username);
     }
 }
 
@@ -142,10 +142,10 @@ module.exports.removeRoleFromMember = function (member, roleName) {
 
     if (role) {
         member.roles.remove(role).catch(error => {
-            console.log("Could not remove role from: " + member.name + ": " + error);
+            console.log("Could not remove role from: " + member.user.username + ": " + error);
         });
 
-        console.log("Revoked role " + role.name + " from " + member.name);
+        console.log("Revoked role " + role.name + " from " + member.user.username);
     }
 }
 
