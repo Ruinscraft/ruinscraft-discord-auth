@@ -39,7 +39,7 @@ discordjsClient.on("message", async message => {
         // eg. 123e4567
 
         // check the length first before hitting the database
-        if (token.length !== 8) {
+        if (token.length > 8) {
             notifyMemberNotValidToken(message.member);
             return;
         }
